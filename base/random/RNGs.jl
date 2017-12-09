@@ -42,6 +42,9 @@ for T in (Bool, Base.BitInteger_types...)
     end
 end
 
+# RandomDevice produces natively UInt64
+rng_native_52(::RandomDevice) = UInt64
+
 """
     RandomDevice()
 
@@ -53,10 +56,6 @@ RandomDevice
 
 RandomDevice(::Void) = RandomDevice()
 srand(rng::RandomDevice) = rng
-
-### generation of floats
-
-rand(r::RandomDevice, sp::SamplerTrivial{<:FloatInterval}) = rand_generic(r, sp[])
 
 
 ## MersenneTwister
@@ -209,58 +208,59 @@ const GLOBAL_RNG = MersenneTwister(0)
 
 ### generation
 
+# MersenneTwister produces natively Float64
+rng_native_52(::MersenneTwister) = Float64
+
 #### helper functions
 
 # precondition: !mt_empty(r)
 rand_inbounds(r::MersenneTwister, ::Close1Open2_64) = mt_pop!(r)
-rand_inbounds(r::MersenneTwister, ::CloseOpen_64) =
+rand_inbounds(r::MersenneTwister, ::CloseOpen_64=CloseOpen()) =
     rand_inbounds(r, Close1Open2()) - 1.0
-rand_inbounds(r::MersenneTwister) = rand_inbounds(r, CloseOpen())
 
-rand_ui52_raw_inbounds(r::MersenneTwister) =
-    reinterpret(UInt64, rand_inbounds(r, Close1Open2()))
-rand_ui52_raw(r::MersenneTwister) = (reserve_1(r); rand_ui52_raw_inbounds(r))
+rand_inbounds(r::MersenneTwister, ::UInt52Raw{T}) where {T<:BitInteger} =
+    reinterpret(UInt64, rand_inbounds(r, Close1Open2())) % T
 
-function rand_ui2x52_raw(r::MersenneTwister)
-    reserve(r, 2)
-    rand_ui52_raw_inbounds(r) % UInt128 << 64 | rand_ui52_raw_inbounds(r)
+function rand(r::MersenneTwister, x::SamplerTrivial{UInt52Raw{UInt64}})
+    reserve_1(r)
+    rand_inbounds(r, x[])
 end
 
-function rand_ui104_raw(r::MersenneTwister)
+function rand(r::MersenneTwister, ::SamplerTrivial{UInt2x52Raw{UInt128}})
     reserve(r, 2)
-    rand_ui52_raw_inbounds(r) % UInt128 << 52 ⊻ rand_ui52_raw_inbounds(r)
+    rand_inbounds(r, UInt52Raw(UInt128)) << 64 | rand_inbounds(r, UInt52Raw(UInt128))
 end
 
-rand_ui10_raw(r::MersenneTwister) = rand_ui52_raw(r)
-rand_ui23_raw(r::MersenneTwister) = rand_ui52_raw(r)
+function rand(r::MersenneTwister, ::SamplerTrivial{UInt104Raw{UInt128}})
+    reserve(r, 2)
+    rand_inbounds(r, UInt52Raw(UInt128)) << 52 ⊻ rand_inbounds(r, UInt52Raw(UInt128))
+end
 
 #### floats
 
-rand(r::MersenneTwister, sp::SamplerTrivial{<:FloatInterval_64}) =
+rand(r::MersenneTwister, sp::SamplerTrivial{Close1Open2_64}) =
     (reserve_1(r); rand_inbounds(r, sp[]))
-
-rand(r::MersenneTwister, sp::SamplerTrivial{<:FloatInterval}) = rand_generic(r, sp[])
 
 #### integers
 
 rand(r::MersenneTwister,
      T::SamplerUnion(Union{Bool,Int8,UInt8,Int16,UInt16,Int32,UInt32})) =
-         rand_ui52_raw(r) % T[]
+         rand(r, UInt52Raw()) % T[]
 
 function rand(r::MersenneTwister, ::SamplerType{UInt64})
     reserve(r, 2)
-    rand_ui52_raw_inbounds(r) << 32 ⊻ rand_ui52_raw_inbounds(r)
+    rand_inbounds(r, UInt52Raw()) << 32 ⊻ rand_inbounds(r, UInt52Raw())
 end
 
 function rand(r::MersenneTwister, ::SamplerType{UInt128})
     reserve(r, 3)
-    xor(rand_ui52_raw_inbounds(r) % UInt128 << 96,
-        rand_ui52_raw_inbounds(r) % UInt128 << 48,
-        rand_ui52_raw_inbounds(r))
+    xor(rand_inbounds(r, UInt52Raw(UInt128))  << 96,
+        rand_inbounds(r, UInt52Raw(UInt128))  << 48,
+        rand_inbounds(r, UInt52Raw(UInt128)))
 end
 
-rand(r::MersenneTwister, ::SamplerType{Int64})  = reinterpret(Int64,  rand(r, UInt64))
-rand(r::MersenneTwister, ::SamplerType{Int128}) = reinterpret(Int128, rand(r, UInt128))
+rand(r::MersenneTwister, ::SamplerType{Int64})  = rand(r, UInt64) % Int64
+rand(r::MersenneTwister, ::SamplerType{Int128}) = rand(r, UInt128) % Int128
 
 #### arrays of floats
 
@@ -395,7 +395,7 @@ function rand!(r::MersenneTwister, A::Array{UInt128}, ::SamplerType{UInt128})
         end
     end
     if n > 0
-        u = rand_ui2x52_raw(r)
+        u = rand(r, UInt2x52Raw())
         for i = 1:n
             @inbounds A[i] ⊻= u << (12*i)
         end
@@ -419,9 +419,12 @@ end
 
 #### from a range
 
-function rand_lteq(r::AbstractRNG, randfun, u::U, mask::U) where U<:Integer
+# helper function, to turn types to values, should be removed once we can do rand(Uniform(UInt))
+rand(rng::AbstractRNG, ::Val{T}) where {T} = rand(rng, T)
+
+function rand_lteq(r::AbstractRNG, S, u::U, mask::U) where U<:Integer
     while true
-        x = randfun(r) & mask
+        x = rand(r, S) & mask
         x <= u && return x
     end
 end
@@ -433,8 +436,8 @@ function rand(rng::MersenneTwister,
     m = last(r) % UInt64 - first(r) % UInt64
     bw = (64 - leading_zeros(m)) % UInt # bit-width
     mask = (1 % UInt64 << bw) - (1 % UInt64)
-    x = bw <= 52 ? rand_lteq(rng, rand_ui52_raw, m, mask) :
-                   rand_lteq(rng, rng->rand(rng, UInt64), m, mask)
+    x = bw <= 52 ? rand_lteq(rng, UInt52Raw(), m, mask) :
+                   rand_lteq(rng, Val(UInt64), m, mask)
     (x + first(r) % UInt64) % T
 end
 
@@ -445,9 +448,9 @@ function rand(rng::MersenneTwister,
     m = (last(r)-first(r)) % UInt128
     bw = (128 - leading_zeros(m)) % UInt # bit-width
     mask = (1 % UInt128 << bw) - (1 % UInt128)
-    x = bw <= 52  ? rand_lteq(rng, rand_ui52_raw, m % UInt64, mask % UInt64) % UInt128 :
-        bw <= 104 ? rand_lteq(rng, rand_ui104_raw, m, mask) :
-                    rand_lteq(rng, rng->rand(rng, UInt128), m, mask)
+    x = bw <= 52  ? rand_lteq(rng, UInt52Raw(), m % UInt64, mask % UInt64) % UInt128 :
+        bw <= 104 ? rand_lteq(rng, UInt104Raw(), m, mask) :
+                    rand_lteq(rng, Val(UInt128), m, mask)
     x % T + first(r)
 end
 

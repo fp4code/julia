@@ -23,17 +23,17 @@ Sampler(rng::AbstractRNG, ::Type{T}, n::Repetition) where {T<:AbstractFloat} =
 # generic random generation function which can be used by RNG implementors
 # it is not defined as a fallback rand method as this could create ambiguities
 
-rand_generic(r::AbstractRNG, ::CloseOpen{Float16}) =
+rand(r::AbstractRNG, ::SamplerTrivial{CloseOpen{Float16}}) =
     Float16(reinterpret(Float32,
-                        (rand_ui10_raw(r) % UInt32 << 13) & 0x007fe000 | 0x3f800000) - 1)
+                        (rand(r, UInt10(UInt32)) << 13)  | 0x3f800000) - 1)
 
-rand_generic(r::AbstractRNG, ::CloseOpen{Float32}) =
-    reinterpret(Float32, rand_ui23_raw(r) % UInt32 & 0x007fffff | 0x3f800000) - 1
+rand(r::AbstractRNG, ::SamplerTrivial{CloseOpen{Float32}}) =
+    reinterpret(Float32, rand(r, UInt23()) | 0x3f800000) - 1
 
-rand_generic(r::AbstractRNG, ::Close1Open2_64) =
-    reinterpret(Float64, 0x3ff0000000000000 | rand(r, UInt64) & 0x000fffffffffffff)
+rand(r::AbstractRNG, ::SamplerTrivial{Close1Open2_64}) =
+    reinterpret(Float64, 0x3ff0000000000000 | rand(r, UInt52()))
 
-rand_generic(r::AbstractRNG, ::CloseOpen_64) = rand(r, Close1Open2()) - 1.0
+rand(r::AbstractRNG, ::SamplerTrivial{CloseOpen_64}) = rand(r, Close1Open2()) - 1.0
 
 #### BigFloat
 
@@ -101,11 +101,21 @@ rand(rng::AbstractRNG, sp::SamplerBigFloat{T}) where {T<:FloatInterval{BigFloat}
 
 ### random integers
 
-rand_ui10_raw(r::AbstractRNG) = rand(r, UInt16)
-rand_ui23_raw(r::AbstractRNG) = rand(r, UInt32)
+rand(r::AbstractRNG, ::SamplerTrivial{UInt10Raw{UInt16}}) = rand(r, UInt16)
+rand(r::AbstractRNG, ::SamplerTrivial{UInt23Raw{UInt32}}) = rand(r, UInt32)
 
-rand_ui52_raw(r::AbstractRNG) = reinterpret(UInt64, rand(r, Close1Open2()))
-rand_ui52(r::AbstractRNG) = rand_ui52_raw(r) & 0x000fffffffffffff
+rand(r::AbstractRNG, ::SamplerTrivial{UInt52Raw{UInt64}}) =
+    _rand52(r, rng_native_52(r))
+
+_rand52(r::AbstractRNG, ::Type{Float64}) = reinterpret(UInt64, rand(r, Close1Open2()))
+_rand52(r::AbstractRNG, ::Type{UInt64})  = rand(r, UInt64)
+
+rand(r::AbstractRNG, ::SamplerTrivial{UInt10{UInt16}}) = rand(r, UInt10Raw()) & 0x03ff
+rand(r::AbstractRNG, ::SamplerTrivial{UInt23{UInt32}}) = rand(r, UInt23Raw()) & 0x007fffff
+rand(r::AbstractRNG, ::SamplerTrivial{UInt52{UInt64}}) = rand(r, UInt52Raw()) & 0x000fffffffffffff
+
+rand(r::AbstractRNG, sp::SamplerTrivial{<:UniformBits{T}}) where {T} =
+        rand(r, uint_default(sp[])) % T
 
 ### random complex numbers
 
