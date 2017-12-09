@@ -744,6 +744,10 @@ Deprecated or removed
     `isdigit`, `isxdigit`, `isnumber`, `isalnum`, `iscntrl`, `ispunct`, `isspace`,
     `isprint`, `isgraph`, `lowercase`, `uppercase`, `titlecase`, `lcfirst` and `ucfirst`.
 
+  * `isnumber` has been deprecated in favor of `isnumeric`, `is_assigned_char`
+    in favor of `isassigned` and `normalize_string` in favor of `normalize`, all three
+    in the new `Unicode` standard library module ([#25021]).
+
 Command-line option changes
 ---------------------------
 
@@ -1708,7 +1712,7 @@ Command-line option changes
 [#24221]: https://github.com/JuliaLang/julia/issues/24221
 [#24240]: https://github.com/JuliaLang/julia/issues/24240
 [#24245]: https://github.com/JuliaLang/julia/issues/24245
-[#24250]: https://github.com/JuliaLang/julia/issues/24250
+[#24250]: https://github.com/JuliaLang/julia/issues/2425
 [#24263]: https://github.com/JuliaLang/julia/issues/24263
 [#24279]: https://github.com/JuliaLang/julia/issues/24279
 [#24281]: https://github.com/JuliaLang/julia/issues/24281
