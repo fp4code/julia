@@ -209,13 +209,15 @@ For example, NFKC corresponds to the options `compose=true, compat=true, stable=
 
 # Examples
 ```jldoctest
-julia> "μ" == normalize("µ", compat=true) #LHS: Unicode U+03bc, RHS: Unicode U+00b5
+julia> using Unicode
+
+julia> "μ" == Unicode.normalize("µ", compat=true) #LHS: Unicode U+03bc, RHS: Unicode U+00b5
 true
 
-julia> normalize("JuLiA", casefold=true)
+julia> Unicode.normalize("JuLiA", casefold=true)
 "julia"
 
-julia> normalize("JúLiA", stripmark=true)
+julia> Unicode.normalize("JúLiA", stripmark=true)
 "JuLiA"
 ```
 """
@@ -239,6 +241,8 @@ Give the number of columns needed to print a character.
 
 # Examples
 ```jldoctest
+julia> using Unicode
+
 julia> textwidth('α')
 1
 
@@ -255,6 +259,8 @@ Give the number of columns needed to print a string.
 
 # Examples
 ```jldoctest
+julia> using Unicode
+
 julia> textwidth("March")
 5
 ```
@@ -281,6 +287,8 @@ Returns `true` if the given char or integer is an assigned Unicode code point.
 
 # Examples
 ```jldoctest
+julia> using Unicode
+
 julia> isassigned(101)
 true
 
@@ -301,6 +309,8 @@ Letter: Lowercase.
 
 # Examples
 ```jldoctest
+julia> using Unicode
+
 julia> islower('α')
 true
 
@@ -324,6 +334,8 @@ Letter: Uppercase, or Lt, Letter: Titlecase.
 
 # Examples
 ```jldoctest
+julia> using Unicode
+
 julia> isupper('γ')
 false
 
@@ -346,6 +358,8 @@ Tests whether a character is a decimal digit (0-9).
 
 # Examples
 ```jldoctest
+julia> using Unicode
+
 julia> isdigit('❤')
 false
 
@@ -367,6 +381,8 @@ category Letter, i.e. a character whose category code begins with 'L'.
 
 # Examples
 ```jldoctest
+julia> using Unicode
+
 julia> isalpha('❤')
 false
 
@@ -391,6 +407,8 @@ Use [`isdigit`](@ref) to check whether a character a decimal digit between 0 and
 
 # Examples
 ```jldoctest
+julia> using Unicode
+
 julia> isnumeric('௰')
 true
 
@@ -415,6 +433,8 @@ category Letter or Number, i.e. a character whose category code begins with 'L' 
 
 # Examples
 ```jldoctest
+julia> using Unicode
+
 julia> isalnum('❤')
 false
 
@@ -441,6 +461,8 @@ Control characters are the non-printing characters of the Latin-1 subset of Unic
 
 # Examples
 ```jldoctest
+julia> using Unicode
+
 julia> iscntrl('\\x01')
 true
 
@@ -458,6 +480,8 @@ character whose category code begins with 'P'.
 
 # Examples
 ```jldoctest
+julia> using Unicode
+
 julia> ispunct('α')
 false
 
@@ -481,6 +505,8 @@ category Zs.
 
 # Examples
 ```jldoctest
+julia> using Unicode
+
 julia> isspace('\\n')
 true
 
@@ -503,6 +529,8 @@ Tests whether a character is printable, including spaces, but not a control char
 
 # Examples
 ```jldoctest
+julia> using Unicode
+
 julia> isprint('\\x01')
 false
 
@@ -523,6 +551,8 @@ classified with `isgraph(c)==true`.
 
 # Examples
 ```jldoctest
+julia> using Unicode
+
 julia> isgraph('\\x01')
 false
 
@@ -540,6 +570,8 @@ all elements of a string.
 
 # Examples
 ```jldoctest
+julia> using Unicode
+
 julia> isascii('a')
 true
 
@@ -564,6 +596,8 @@ include `x` (as in the standard `0x` prefix).
 
 # Examples
 ```jldoctest
+julia> using Unicode
+
 julia> isxdigit('a')
 true
 
@@ -582,6 +616,8 @@ Return `s` with all characters converted to uppercase.
 
 # Examples
 ```jldoctest
+julia> using Unicode
+
 julia> uppercase("Julia")
 "JULIA"
 ```
@@ -595,6 +631,8 @@ Return `s` with all characters converted to lowercase.
 
 # Examples
 ```jldoctest
+julia> using Unicode
+
 julia> lowercase("STRINGS AND THINGS")
 "strings and things"
 ```
@@ -610,6 +648,8 @@ character in `s`.
 
 # Examples
 ```jldoctest
+julia> using Unicode
+
 julia> titlecase("the julia programming language")
 "The Julia Programming Language"
 ```
@@ -639,6 +679,8 @@ every word in `s`.
 
 # Examples
 ```jldoctest
+julia> using Unicode
+
 julia> ucfirst("python")
 "Python"
 ```
@@ -657,6 +699,8 @@ Return `string` with the first character converted to lowercase.
 
 # Examples
 ```jldoctest
+julia> using Unicode
+
 julia> lcfirst("Julia")
 "julia"
 ```
