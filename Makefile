@@ -188,7 +188,7 @@ CORE_SRCS := $(addprefix $(JULIAHOME)/, \
 		base/hashing.jl \
 		base/inference.jl \
 		base/int.jl \
-		base/intset.jl \
+		base/bitset.jl \
 		base/number.jl \
 		base/operators.jl \
 		base/options.jl \

@@ -183,7 +183,7 @@ include("reduce.jl")
 ## core structures
 include("reshapedarray.jl")
 include("bitarray.jl")
-include("intset.jl")
+include("bitset.jl")
 
 if !isdefined(Core, :Inference)
     include("docs/core.jl")

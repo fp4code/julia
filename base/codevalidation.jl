@@ -76,13 +76,13 @@ function validate_code!(errors::Vector{>:InvalidCodeError}, c::CodeInfo, is_top_
                 end
             end
         elseif isa(x, SSAValue)
-            id = x.id + 1 # ensures that id > 0 for use with IntSet
+            id = x.id + 1 # ensures that id > 0 for use with BitSet
             !in(id, ssavals) && push!(ssavals, id)
         end
     end
 
-    ssavals = IntSet()
-    lhs_slotnums = IntSet()
+    ssavals = BitSet()
+    lhs_slotnums = BitSet()
     for x in c.code
         if isa(x, Expr)
             head = x.head

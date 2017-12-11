@@ -2058,8 +2058,8 @@ end
 @deprecate Vector(m::Integer)                                       Vector(uninitialized, m)
 @deprecate Matrix(m::Integer, n::Integer)                           Matrix(uninitialized, m, n)
 
-# deprecate BitSet to IntSet
-@deprecate_binding BitSet IntSet
+# deprecate IntSet to BitSet
+@deprecate_binding IntSet BitSet
 
 # Issue 24219
 @deprecate float(x::AbstractString) parse(Float64, x)

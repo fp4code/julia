@@ -1405,7 +1405,7 @@ Base.reverse(s::SubString{GenericString}) =
 """
 The `GenericSet` can be used to test generic set APIs that program to
 the `AbstractSet` interface, in order to ensure that functions can work
-with set types besides the standard `Set` and `IntSet` types.
+with set types besides the standard `Set` and `BitSet` types.
 """
 struct GenericSet{T} <: AbstractSet{T}
     s::AbstractSet{T}
