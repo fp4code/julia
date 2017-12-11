@@ -68,7 +68,7 @@ export
     IndexLinear,
     IndexStyle,
     InsertionSort,
-    BitSet,
+    IntSet,
     IOBuffer,
     IOStream,
     LinSpace,

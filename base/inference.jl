@@ -221,7 +221,7 @@ mutable struct InferenceState
     # return type
     bestguess #::Type
     # current active instruction pointers
-    ip::BitSet
+    ip::IntSet
     pc´´::LineNum
     nstmts::Int
     # current exception handler info
@@ -229,7 +229,7 @@ mutable struct InferenceState
     handler_at::Vector{Any}
     n_handlers::Int
     # ssavalue sparsity and restart info
-    ssavalue_uses::Vector{BitSet}
+    ssavalue_uses::Vector{IntSet}
     ssavalue_defs::Vector{LineNum}
     vararg_type_container #::Type
 
@@ -303,7 +303,7 @@ mutable struct InferenceState
         handler_at = Any[ () for i=1:n ]
         n_handlers = 0
 
-        W = BitSet()
+        W = IntSet()
         push!(W, 1) #initial pc to visit
 
         if !toplevel
@@ -3088,7 +3088,7 @@ end
 
 
 function find_ssavalue_uses(body::Vector{Any}, nvals::Int)
-    uses = BitSet[ BitSet() for i = 1:nvals ]
+    uses = IntSet[ IntSet() for i = 1:nvals ]
     for line in 1:length(body)
         e = body[line]
         isa(e, Expr) && find_ssavalue_uses(e, uses, line)
@@ -3096,7 +3096,7 @@ function find_ssavalue_uses(body::Vector{Any}, nvals::Int)
     return uses
 end
 
-function find_ssavalue_uses(e::Expr, uses::Vector{BitSet}, line::Int)
+function find_ssavalue_uses(e::Expr, uses::Vector{IntSet}, line::Int)
     head = e.head
     is_meta_expr_head(head) && return
     skiparg = (head === :(=))
@@ -5671,8 +5671,8 @@ end
 function basic_dce_pass!(sv::OptimizationState)
     body = sv.src.code
     labelmap = get_label_map(body)
-    reachable = BitSet()
-    W = BitSet()
+    reachable = IntSet()
+    W = IntSet()
     push!(W, 1)
     while !isempty(W)
         pc = pop!(W)

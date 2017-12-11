@@ -255,14 +255,14 @@ Sampler(rng::AbstractRNG, t::Set, n::Repetition) = SamplerTag{Set}(Sampler(rng, 
 
 rand(rng::AbstractRNG, sp::SamplerTag{Set,<:Sampler}) = rand(rng, sp.data).first
 
-## random values from BitSet
+## random values from IntSet
 
-function Sampler(rng::AbstractRNG, t::BitSet, n::Repetition)
+function Sampler(rng::AbstractRNG, t::IntSet, n::Repetition)
     isempty(t) && throw(ArgumentError("collection must be non-empty"))
     SamplerSimple(t, Sampler(rng, linearindices(t.bits), Val(Inf)))
 end
 
-function rand(rng::AbstractRNG, sp::SamplerSimple{BitSet,<:Sampler})
+function rand(rng::AbstractRNG, sp::SamplerSimple{IntSet,<:Sampler})
     while true
         n = rand(rng, sp.data)
         @inbounds b = sp[].bits[n]

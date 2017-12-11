@@ -40,7 +40,7 @@ Fully implemented by:
   * `Tuple`
   * `Number`
   * [`AbstractArray`](@ref)
-  * [`BitSet`](@ref)
+  * [`IntSet`](@ref)
   * [`ObjectIdDict`](@ref)
   * [`Dict`](@ref)
   * [`WeakKeyDict`](@ref)
@@ -64,7 +64,7 @@ Fully implemented by:
   * `Tuple`
   * `Number`
   * [`AbstractArray`](@ref)
-  * [`BitSet`](@ref)
+  * [`IntSet`](@ref)
   * [`ObjectIdDict`](@ref)
   * [`Dict`](@ref)
   * [`WeakKeyDict`](@ref)
@@ -214,7 +214,7 @@ Fully implemented by:
 
 Partially implemented by:
 
-  * [`BitSet`](@ref)
+  * [`IntSet`](@ref)
   * [`Set`](@ref)
   * [`EnvDict`](@ref Base.EnvDict)
   * [`Array`](@ref)
@@ -224,23 +224,23 @@ Partially implemented by:
 
 ```@docs
 Base.Set
-Base.BitSet
+Base.IntSet
 Base.union
 Base.union!
 Base.intersect
 Base.setdiff
 Base.setdiff!
 Base.symdiff
-Base.symdiff!(::BitSet, ::Integer)
-Base.symdiff!(::BitSet, ::Any)
-Base.symdiff!(::BitSet, ::BitSet)
+Base.symdiff!(::IntSet, ::Integer)
+Base.symdiff!(::IntSet, ::Any)
+Base.symdiff!(::IntSet, ::IntSet)
 Base.intersect!
 Base.issubset
 ```
 
 Fully implemented by:
 
-  * [`BitSet`](@ref)
+  * [`IntSet`](@ref)
   * [`Set`](@ref)
 
 Partially implemented by:

@@ -430,6 +430,8 @@ Library improvements
     definition relies on `ncodeunits` however, so for optimal performance you may need to
     define a custom method for that function.
 
+  * `IntSet` now lives up to its premise and can store any `Int`.
+
 Compiler/Runtime improvements
 -----------------------------
 

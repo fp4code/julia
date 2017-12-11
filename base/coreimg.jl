@@ -55,7 +55,7 @@ include("reduce.jl")
 
 ## core structures
 include("bitarray.jl")
-include("bitset.jl")
+include("intset.jl")
 include("associative.jl")
 include("namedtuple.jl")
 
